@@ -3,7 +3,7 @@
  * Plugin Name: Under Construction & Maintenance Mode
  * Plugin URI: https://wpbrigade.com/wordpress/plugins/under-construction-maintenance-mode/?utm_source=ucmm-org&utm_medium=plugin-url-link
  * Description: This plugin will Display an Under Construction, Maintenance Mode or Coming Soon landing Page that takes 5 seconds to setup, while you're doing maintenance work on your site.
- * Version: 2.0.0
+ * Version: 2.1.0
  * Author: WPBrigade
  * Author URI: https://www.WPBrigade.com/?utm_source=ucmm-org&utm_medium=author-url-link
  * Requires at least: 4.0
@@ -64,7 +64,7 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 		/**
 		 * @var string
 		 */
-		public $version = '2.0.0';
+		public $version = '2.1.0';
 
 		/**
 		 * @var array
@@ -109,7 +109,6 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 
 			add_action( 'init', array( $this, 'ucmm_redirect_customizer' ) );
 			add_action( 'init', array( $this, 'ucmm_set_setting' ) );
-			add_action( 'plugins_loaded', array( $this, 'ucmm_textdomain' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'ucmm_admin_scripts' ) );
 			add_action( 'wp', array( $this, 'ucmm_parse_request' ), 10, 1 ); 
 			add_action( 'admin_menu', array( $this, 'ucmm_callback_url' ), 99 );
@@ -125,6 +124,7 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 			add_action( 'admin_footer', array( $this, 'add_deactivate_modal' ) );
 			add_action('admin_menu', array($this, 'register_ucmm_optin_page'));
 			add_action( 'wp_ajax_ucmm_optout_yes', array( $this, 'optout_yes' ) );
+			add_action( 'wp_wpb_sdk_after_uninstall', array( $this, 'plugin_uninstallation' ) );
 
 		}
 
@@ -188,6 +188,15 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
             update_option('wpb_sdk_under-construction-maintenance-mode', json_encode($sdk_data));
 
 			wp_die();
+		}
+
+        /**
+         * This function is triggered when the plugin is uninstalled.
+		 * 
+         * @since 2.1.0
+         */
+		function plugin_uninstallation() {
+            include_once ( UCMM_WPBRIGADE_DIR_PATH . 'includes/uninstall.php' );
 		}
 
 		/**
@@ -264,17 +273,6 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 
 		}
 
-		/**
-		 * Load Languages
-		 *
-		 * @since 1.0.0
-		 */
-		public function ucmm_textdomain() {
-
-			$plugin_dir = dirname( plugin_basename( __FILE__ ) );
-			load_plugin_textdomain( 'ucmm-wpbrigade', false, $plugin_dir . '/languages/' );
-		}
-
 		public function ucmm_activation() {
 
 			/*Activation Plugin*/
@@ -309,6 +307,9 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 					// wp_redirect(get_admin_url()."customize.php?url=".home_url()."/ucmm-customize.php?watch=ucmm-customizer");
 				}
 			}
+
+			$plugin_dir = dirname( plugin_basename( __FILE__ ) );
+			load_plugin_textdomain( 'ucmm-wpbrigade', false, $plugin_dir . '/languages/' );
 		}
 
 		/**

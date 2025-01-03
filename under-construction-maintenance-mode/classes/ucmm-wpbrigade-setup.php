@@ -103,6 +103,12 @@ class UCMM_WPBrigade_Setting {
               // 'default'             => array( 'ucmm-wpbrigade_role_administrator' => 'Administrator'),
               'options'             => $ucmm_wpbrigade_roles
             ),
+            array(
+              'name'  => 'ucmm-uninstall',
+              'label' => __( 'Reset Settings on Uninstall:', 'ucmm-wpbrigade' ),
+              'desc'  => __( 'Reset settings to default upon uninstall.' , 'ucmm-wpbrigade' ),
+              'type'  => 'checkbox',
+            ),
           ),
         // 'ucmm_wpbrigade_seo' => array(
         //   array(

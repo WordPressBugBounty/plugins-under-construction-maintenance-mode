@@ -100,14 +100,14 @@ foreach ( $social_network as $key => $value ) {
 		height: 100%;
 	}
 	body{
-		display: table;
-		min-height: 100%;
-		margin: 0;
+		display: grid;
+		place-items: center;
+		grid-template-rows: auto 1fr auto;
 		text-align: center;
-		width: 100%;
 		background-image: url(<?php echo null != $ucmm_bg ? $ucmm_bg : plugins_url( 'img/coming-soon.png', __FILE__ ); ?>);
 		background-size: cover;
 		background-position: center;
+		margin: 0;
 
 	}
 	h1{
@@ -143,9 +143,7 @@ foreach ( $social_network as $key => $value ) {
 		color: inherit;
 	}
 	.footer-love {
-		position: absolute;
 		color: #fff;
-		bottom: 0;
 		padding: 20px;
 		padding-bottom: 5px;
 		width: 100%;
@@ -161,10 +159,6 @@ foreach ( $social_network as $key => $value ) {
 	}
 	/* Icons style start here */
 	.ucmm-social-icons{
-		position: absolute;
-		bottom: 30px;
-		width: 100%;
-		left: 0;
 	}
 	.ucmm-icon{
 		width: 40px;
@@ -195,9 +189,9 @@ foreach ( $social_network as $key => $value ) {
 		color: <?php echo isset( $ucmm_love_text_color ) ? sanitize_hex_color( $ucmm_love_text_color ) : '#fff' ?>
 	}
 	.ucmm-twitter-icon{
-		background: #1DA1F2;
+		background: #000;
 		<?php if( empty( $ucmm_social_links['ucmm_twitter'] ) ) { ?>
-			display: none
+			display: none !important;
 		<?php } ?>
 	}
 	.ucmm-linkedin-icon{
@@ -242,16 +236,35 @@ foreach ( $social_network as $key => $value ) {
 		padding-top: 15px;
 		font-size: 50px;
 		color: <? echo $ucmm_time_text_color?>;
+		height: 100%;
+    display: flex;
+    align-items: flex-start;
+    padding-bottom: 20px;
+    box-sizing: border-box;
 }
 @media only screen and (max-width: 600px) {
 	h1{
 		font-size:40px;
 	}
 }
-
+.ucmm-twitter-icon svg path{
+    fill: #fff;
+}
+.ucmm-twitter-icon svg{
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+.ucmm-twitter-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
 	<?php if ( ! empty( $ucmm_custom_css ) ) : ?>
 		<?php echo $ucmm_custom_css; ?>
 	<?php endif; ?>
+	
 	</style>
 
 </head>
@@ -292,7 +305,7 @@ foreach ( $social_network as $key => $value ) {
 	if( is_customize_preview() ){
 		echo '<div class="ucmm-social-icons">';
 		echo '<a class="ucmm-facebook-icon ucmm-icon" href="' . $ucmm_social_links['ucmm_facebook'] . '"><i class="fab fa-facebook-f"></i></a>';
-		echo '<a class="ucmm-twitter-icon ucmm-icon" href="' . $ucmm_social_links['ucmm_twitter']  . '"><i class="fab fa-twitter"></i></a>';
+		echo '<a class="ucmm-twitter-icon ucmm-icon" href="' . $ucmm_social_links['ucmm_twitter']  . '"><svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 30 30"><path d="M26.37,26l-8.795-12.822l0.015,0.012L25.52,4h-2.65l-6.46,7.48L11.28,4H4.33l8.211,11.971L12.54,15.97L3.88,26h2.65 l7.182-8.322L19.42,26H26.37z M10.23,6l12.34,18h-2.1L8.12,6H10.23z"></path></svg></a>';
 		echo '<a class="ucmm-linkedin-icon ucmm-icon" href="' . $ucmm_social_links['ucmm_linkedin'] . '"><i class="fab fa-linkedin"></i></a>';
 		echo '<a class="ucmm-youtube-icon ucmm-icon" href="' . $ucmm_social_links['ucmm_youtube'] . '"><i class="fab fa-youtube"></i></a>';
 		echo '<a class="ucmm-instagram-icon ucmm-icon" href="' . $ucmm_social_links['ucmm_instagram'] . '"><i class="fab fa-instagram"></i></a>';
@@ -308,7 +321,7 @@ foreach ( $social_network as $key => $value ) {
 			echo '<a class="ucmm-facebook-icon ucmm-icon" href="' . $ucmm_social_links['ucmm_facebook'] . '"><i class="fab fa-facebook-f"></i></a>';
 		}
 		if( !($ucmm_social_links['ucmm_twitter'] == '' ) ){
-			echo '<a class="ucmm-twitter-icon ucmm-icon" href="' . $ucmm_social_links['ucmm_twitter'] . '"><i class="fab fa-twitter"></i></a>';
+			echo '<a class="ucmm-twitter-icon ucmm-icon" href="' . $ucmm_social_links['ucmm_twitter'] . '"><svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" height="100" viewBox="0 0 30 30"><path d="M26.37,26l-8.795-12.822l0.015,0.012L25.52,4h-2.65l-6.46,7.48L11.28,4H4.33l8.211,11.971L12.54,15.97L3.88,26h2.65 l7.182-8.322L19.42,26H26.37z M10.23,6l12.34,18h-2.1L8.12,6H10.23z"></path></svg></a>';
 		}
 		if( !( $ucmm_social_links['ucmm_linkedin'] == '' ) ){
 			echo '<a class="ucmm-linkedin-icon ucmm-icon" href="' . $ucmm_social_links['ucmm_linkedin'] . '"><i class="fab fa-linkedin"></i></a>';
@@ -337,7 +350,10 @@ foreach ( $social_network as $key => $value ) {
 
 </body>
 
-<?php if ( $ucmm_show_end_time && $ucmm_schedule_end_time ) : // statr if  to show counter add counter script ?>
+<?php if ( $ucmm_show_end_time && $ucmm_schedule_end_time ) : // statr if  to show counter add counter script 
+?>
+
+
 <script>
 
 // Set the date we're counting down to.
@@ -348,7 +364,7 @@ var countDownDate = new Date( endDate ).getTime();
 var x = setInterval(function() {
 
   // Get today's date and time
-  var currentTime = new Date().toLocaleString("en-US", {timeZone: "<?php echo get_option( 'timezone_string' ); ?>"})
+  var currentTime = new Date().toLocaleString("en-US", {timeZone: "<?php echo get_option( 'timezone_string' ) ? get_option( 'timezone_string' ) : "UTC"; ?>"})
 
 	var now = new Date( currentTime ).getTime();
   // Find the distance between now and the count down date

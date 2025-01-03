@@ -132,7 +132,11 @@
     display: block;
     position: relative;
 }
-
+.ucmm-wpbrigade .wpbr-sidebar svg{
+	width: 20px;
+	height: 20px;
+}
+.ucmm-wpbrigade .wpbr-sidebar svg,
 .ucmm-wpbrigade .wpbr-sidebar .dashicons {
     position: absolute;
     right: 10px;
