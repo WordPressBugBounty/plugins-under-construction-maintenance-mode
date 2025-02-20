@@ -5,7 +5,7 @@ Donate link: Author URI: https://wpbrigade.com/?utm_source=ucmm-org&utm_medium=d
 Tags: coming soon, under construction, maintenance mode, maintenance, comingsoon,
 Requires at least: 5.0
 Tested up to: 6.7
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -94,7 +94,11 @@ This section describes how to install the plugin and get it working.
 
 == Changelog ==
 
-= 2.1.0 – 2025-01-03 =
+= 2.1.1 – 2025-02-20 =
+* Bugfix: Resolved an issue with the Customizer screen on Linux/Nginx servers.
+* Compatibility: Compatible with WordPress 6.7
+
+= 2.1.0 – 2024-12-16 =
 * Bugfix: PHP Warning for translation hook.
 * New Feature: Create a option for removing the plugin settings/page during un-installation of the plugin.
 * Enhancement: Update the responsive view for mobile devices.
@@ -225,5 +229,5 @@ This section describes how to install the plugin and get it working.
 
 == Upgrade Notice ==
 
-= 2.1.0 =
+= 2.1.1 =
 Upgrade Immediately
