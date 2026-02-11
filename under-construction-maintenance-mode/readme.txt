@@ -4,7 +4,7 @@ Author URI: https://wpbrigade.com/?utm_source=ucmm-org&utm_medium=author-url-lin
 Donate link: Author URI: https://wpbrigade.com/?utm_source=ucmm-org&utm_medium=donate-url-link
 Tags: coming soon, under construction, maintenance mode, maintenance, comingsoon,
 Requires at least: 5.0
-Tested up to: 6.7
+Tested up to: 6.9
 Stable tag: 2.1.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
