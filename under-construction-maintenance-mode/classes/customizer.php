@@ -374,7 +374,7 @@ class UCMM_WPBrigade_Entities {
 		$wp_customize->add_setting(
 			'ucmm_wpbrigade_customization[footer_text]',
 			array(
-				'default'           => __( 'We are working hard to bring you new experience!', 'ucmm-wpbrigade' ),
+				'default'           => __( 'We are working hard to bring you a new experience!', 'ucmm-wpbrigade' ),
 				'type'              => 'option',
 				'capability'        => 'manage_options',
 				'transport'         => 'postMessage',

@@ -3,12 +3,13 @@
  * Plugin Name: Under Construction & Maintenance Mode
  * Plugin URI: https://wpbrigade.com/wordpress/plugins/under-construction-maintenance-mode/?utm_source=ucmm-org&utm_medium=plugin-url-link
  * Description: This plugin will Display an Under Construction, Maintenance Mode or Coming Soon landing Page that takes 5 seconds to setup, while you're doing maintenance work on your site.
- * Version: 2.1.1
+ * Version: 2.1.2
  * Author: WPBrigade
  * Author URI: https://www.WPBrigade.com/?utm_source=ucmm-org&utm_medium=author-url-link
  * Requires at least: 5.0
  * Text Domain: ucmm-wpbrigade
  * Domain Path: /languages
+ * GitHub Plugin URI: https://github.com/WPBrigade/under-construction-maintenance-mode
  *
  * @package ucmm-wpbrigade
  * @category Core
@@ -64,7 +65,7 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 		/**
 		 * @var string
 		 */
-		public $version = '2.1.1';
+		public $version = '2.1.2';
 
 		/**
 		 * @var array

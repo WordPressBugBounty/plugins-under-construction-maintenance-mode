@@ -287,7 +287,7 @@ foreach ( $social_network as $key => $value ) {
 		if ( isset( $ucmm_footer ) ) {
 			echo wp_kses_post( $ucmm_footer );
 		} else{
-			echo __( 'We are working hard to bring you new experience!', 'ucmm-wpbrigade' );
+			echo __( 'We are working hard to bring you a new experience!', 'ucmm-wpbrigade' );
 
 		}
 		?>

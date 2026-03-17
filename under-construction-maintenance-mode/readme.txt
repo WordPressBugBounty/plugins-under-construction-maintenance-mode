@@ -5,7 +5,7 @@ Donate link: Author URI: https://wpbrigade.com/?utm_source=ucmm-org&utm_medium=d
 Tags: coming soon, under construction, maintenance mode, maintenance, comingsoon,
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -93,6 +93,9 @@ This section describes how to install the plugin and get it working.
 
 
 == Changelog ==
+
+= 2.1.2 – 2026-03-17 =
+* Security: Added nonce verification and capability checks to prevent CSRF attacks.
 
 = 2.1.1 – 2025-02-20 =
 * Bugfix: Resolved an issue with the Customizer screen on Linux/Nginx servers.
@@ -229,5 +232,5 @@ This section describes how to install the plugin and get it working.
 
 == Upgrade Notice ==
 
-= 2.1.1 =
+= 2.1.2 =
 Upgrade Immediately
