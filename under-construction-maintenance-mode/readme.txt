@@ -5,7 +5,7 @@ Donate link: Author URI: https://wpbrigade.com/?utm_source=ucmm-org&utm_medium=d
 Tags: coming soon, under construction, maintenance mode, maintenance, comingsoon,
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -94,6 +94,11 @@ This section describes how to install the plugin and get it working.
 
 == Changelog ==
 
+= 3.0.1 – 2026-07-16 =
+* Bug Fix: Fixed settings dropdown scroll so the search field stays visible while options scroll.
+* Bug Fix: Corrected opt-in logo/CSS display.
+* Enhancement: Minor internal improvements and code optimization.
+
 = 3.0.0 – 2026-07-15 =
 * New Feature: Completely redesigned settings interface for faster, easier configuration.
 * New Feature: Choose whether to enable mode for the entire site or specific pages only.
@@ -104,6 +109,7 @@ This section describes how to install the plugin and get it working.
 * Enhancement: Mobile-friendly design for phones and tablets.
 * Enhancement: Better-organized Customizer with new controls.
 * Enhancement: Drag-and-drop reordering for social media icons.
+* Enhancement: Introduced 2 social sharing icons layout.
 * Enhancement: Improved contrast and accessibility.
 * Enhancement: Added `ucmm_redirect_message` filter to customize the pre-live message when the schedule ends.
 * Bugfix: Fixed layout issues on the settings page.
@@ -256,5 +262,5 @@ This section describes how to install the plugin and get it working.
 
 == Upgrade Notice ==
 
-= 3.0.0 =
+= 3.0.1 =
 Upgrade Immediately

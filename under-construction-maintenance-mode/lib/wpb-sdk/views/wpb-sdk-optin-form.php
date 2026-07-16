@@ -37,7 +37,7 @@ $wpb_sdk_optin_name = empty( $wpb_sdk_optin_user->user_firstname )
 		margin-bottom: 0;
 	}
 	#wpb-sdk-optin-logo {
-		max-width: 90px;
+		max-width: 180px;
 		height: auto;
 		vertical-align: middle;
 	}
