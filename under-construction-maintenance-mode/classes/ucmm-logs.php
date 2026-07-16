@@ -51,11 +51,11 @@ class Uccm_Logs_Info {
 		$html .= 'PHP Version:              ' . PHP_VERSION . "\n";
 		$html .= 'MySQL Version:            ' . $wpdb->db_version() . "\n";
 
-		$html .= 'Server Software:          ' . $_SERVER['SERVER_SOFTWARE'] . "\n";
+		$html .= 'Server Software:          ' . ( isset( $_SERVER['SERVER_SOFTWARE'] ) ? $_SERVER['SERVER_SOFTWARE'] : 'Unknown' ) . "\n";
 
 		// PHP configs... now we're getting to the important stuff
 		$html .= "\n" . '-- PHP Configuration --' . "\n\n";
-		$html .= 'Safe Mode:                ' . ( ini_get( 'safe_mode' ) ? 'Enabled' : 'Disabled' . "\n" );
+		$html .= 'Safe Mode:                ' . ( ini_get( 'safe_mode' ) ? 'Enabled' : 'Disabled' ) . "\n";
 		$html .= 'Memory Limit:             ' . ini_get( 'memory_limit' ) . "\n";
 		$html .= 'Post Max Size:            ' . ini_get( 'post_max_size' ) . "\n";
 		$html .= 'Upload Max Filesize:      ' . ini_get( 'upload_max_filesize' ) . "\n";

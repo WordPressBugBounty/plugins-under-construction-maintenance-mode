@@ -1,72 +1,6 @@
 (function($) {
 
-
-    //   if ( $("#ucmm_wpbrigade_mc_lists\\[ucmm-mc-api-key\\]").val() == '' ) {
-    //     $("#ucmm_wpbrigade_mc_lists\\[selectbox\\]").hide();
-    //     $("#ucmm_wpbrigade_mc_lists\\[selectbox\\]").next().html("Please Enter the API Key to access the MailChimp List.");
-    //   }
-
-    // $("#ucmm_wpbrigade_mc_lists\\[ucmm-mc-api-key\\]").on('keyup', function(e) {
-
-    //     if ($("#ucmm_wpbrigade_mc_lists\\[ucmm-mc-api-key\\]").val() != '') {
-    //         var r = $('<input type="button" value="new button" id="ucmm-mc-api"/>');
-    //         $("#ucmm_wpbrigade_mc_lists\\[ucmm-mc-api-key\\]").next().html(r);
-    //         // $("#ucmm_wpbrigade_mc_lists\\[selectbox\\]").show();
-    //         // $("#ucmm_wpbrigade_mc_lists\\[selectbox\\]").next().html("Select the List.");
-    //     } else {
-    //         // $("#ucmm_wpbrigade_mc_lists\\[ucmm-mc-api-key\\]").next().html("Mail Chimp Key.");
-    //         // $("#ucmm_wpbrigade_mc_lists\\[selectbox\\]").hide();
-    //         // $("#ucmm_wpbrigade_mc_lists\\[selectbox\\]").next().html("Please Enter the API Key to access the MailChimp List.");
-    //     }
-
-
-    // });
-    //   $(document).on( 'click', "#ucmm-mc-api", function(e) {
-
-    //   // getting the value.
-    //   var apiKey = $("#ucmm_wpbrigade_mc_lists\\[ucmm-mc-api-key\\]").val();
-    //   e.preventDefault();
-    //   $.ajax({
-    //     url : mc_api.ajaxurl,
-    //     type : 'post',
-    //     data : 'apiKey=' + apiKey + '&action=ucmm_mc_api',
-    //     beforeSend: function() {
-    //       $("#ucmm_wpbrigade_mc_lists\\[selectbox\\]").next().append('<img src="' + mc_api.loader + '">');
-    //     },
-    //     success : function( response ) {
-
-    //     $("#ucmm_wpbrigade_mc_lists\\[selectbox\\]").show();
-    //     $('#ucmm_wpbrigade_mc_lists\\[selectbox\\]').append( response );
-    //     $("#ucmm_wpbrigade_mc_lists\\[selectbox\\]").next().html("Select the List.");
-    //     // console.log(response);
-    //     },
-    //     error: function(xhr, textStatus, errorThrown){
-    //       // console.log('Ajax Not Working');
-    //       mc_api.loader;
-    //     }
-    //   });
-    //   });
-
     /** Help file download script **/
-
-    $("#wpuf-ucmm_wpbrigade_setting\\[ucmm-status\\]").on('click', function() {
-
-        ucmm_toggle_Settings();
-    });
-
-    function ucmm_toggle_Settings() {
-
-        if ($("#wpuf-ucmm_wpbrigade_setting\\[ucmm-status\\]").is(":checked")) {
-            $('tr.ucmm-enable').fadeIn();
-            $('tr.ucmm-enable').show();
-        } else {
-            $('tr.ucmm-enable').fadeOut();
-            $('tr.ucmm-enable').hide();
-
-        }
-    }
-
-    ucmm_toggle_Settings();
 
     $('.ucmm-wpbrigade-log-file').on('click', function(event) {
 
@@ -107,6 +41,85 @@
             }
         });
 
+    });
+
+    /** Help page sysinfo copy button **/
+
+    var ucmmCopyResetTimeout = null;
+
+    function ucmmCopyToClipboard(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text);
+        }
+
+        return new Promise(function(resolve, reject) {
+            var $textarea = $('.ucmm-help-sysinfo__textarea');
+
+            if (!$textarea.length) {
+                reject();
+                return;
+            }
+
+            var textarea = $textarea[0];
+            var previousFocus = document.activeElement;
+
+            textarea.focus();
+            textarea.select();
+            textarea.setSelectionRange(0, textarea.value.length);
+
+            try {
+                if (document.execCommand('copy')) {
+                    resolve();
+                } else {
+                    reject();
+                }
+            } catch (error) {
+                reject(error);
+            } finally {
+                if (previousFocus && typeof previousFocus.focus === 'function') {
+                    previousFocus.focus();
+                }
+            }
+        });
+    }
+
+    function ucmmResetCopyButton($btn) {
+        var copyLabel = mc_api.copyLabel || 'Copy';
+
+        $btn.removeClass('is-copied');
+        $btn.find('.ucmm-help-sysinfo-copy__label').text(copyLabel);
+        $btn.find('.ucmm-help-sysinfo-copy__tooltip').text(copyLabel);
+        $btn.attr('aria-label', mc_api.copyAriaLabel || copyLabel);
+    }
+
+    $('.ucmm-help-sysinfo-copy').on('click', function(event) {
+        event.preventDefault();
+
+        var $btn = $(this);
+        var text = $('.ucmm-help-sysinfo__textarea').val();
+
+        if (!text) {
+            return;
+        }
+
+        if (ucmmCopyResetTimeout) {
+            clearTimeout(ucmmCopyResetTimeout);
+            ucmmCopyResetTimeout = null;
+        }
+
+        ucmmCopyToClipboard(text).then(function() {
+            var copiedLabel = mc_api.copiedLabel || 'Copied!';
+
+            $btn.addClass('is-copied');
+            $btn.find('.ucmm-help-sysinfo-copy__label').text(copiedLabel);
+            $btn.find('.ucmm-help-sysinfo-copy__tooltip').text(copiedLabel);
+            $btn.attr('aria-label', copiedLabel);
+
+            ucmmCopyResetTimeout = setTimeout(function() {
+                ucmmResetCopyButton($btn);
+                ucmmCopyResetTimeout = null;
+            }, 2000);
+        });
     });
 
 })(jQuery);

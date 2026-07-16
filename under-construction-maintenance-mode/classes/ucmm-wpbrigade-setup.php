@@ -9,235 +9,230 @@ if ( !class_exists( 'UCMM_WPBrigade_Setting' ) ) :
 
 class UCMM_WPBrigade_Setting {
 
-    private $settings_api;
-
     function __construct() {
 
-      include_once( UCMM_WPBRIGADE_ROOT_PATH . '/classes/ucmm-wpbrigade-settings-api.php' );
-      $this->settings_api = new UCMM_WPBrigade_Settings_API;
-
-      add_action( 'admin_init', array( $this, 'ucmm_wpbrigade_setting_init' ) );
       add_action( 'admin_menu', array( $this, 'ucmm_wpbrigade_setting_menu' ) );
       add_action( 'wp_ajax_ucmm_help', array( $this, 'download_help' ) );
     }
 
-    function ucmm_wpbrigade_setting_init() {
-
-        //set the settings
-        $this->settings_api->set_sections( $this->get_ucmm_settings_sections() );
-        $this->settings_api->set_fields( $this->get_ucmm_settings_fields() );
-
-        //initialize settings
-        $this->settings_api->admin_init();
-    }
-
+    /**
+     * Registers the settings page and its sub-pages in the WordPress admin menu.
+     *
+     * @version 3.0.0
+     * @return void
+     */
     function ucmm_wpbrigade_setting_menu() {
 
       add_menu_page( __( 'Under Construction', 'ucmm-wpbrigade' ), __( 'Under Construction', 'ucmm-wpbrigade' ), 'manage_options', "ucmm_settings", '__return_null', '', 50 );
 
-      add_submenu_page( 'ucmm_settings', __( 'Settings', 'ucmm-wpbrigade' ), __( 'Settings', 'ucmm-wpbrigade' ), 'manage_options', "ucmm_settings", array( $this, 'plugin_page' ) );
+      $settings_page = add_submenu_page( 'ucmm_settings', __( 'Settings', 'ucmm-wpbrigade' ), __( 'Settings', 'ucmm-wpbrigade' ), 'manage_options', "ucmm_settings", array( $this, 'plugin_page' ) );
 
       add_submenu_page( 'ucmm_settings', __( 'Customizer', 'ucmm-wpbrigade' ), __( 'Customizer', 'ucmm-wpbrigade' ), 'manage_options', "under-construction-maintenance-mode", '__return_null' );
       add_submenu_page( 'ucmm_settings', __( 'Help', 'ucmm-wpbrigade' ), __( 'Help', 'ucmm-wpbrigade' ), 'manage_options', 'ucmm-help', array( $this, 'ucmm_help_page' ) );
 
+      // Enqueue React assets only on our settings page
+      add_action( 'load-' . $settings_page, array( $this, 'ucmm_enqueue_react_assets' ) );
+
     }
 
-    function get_ucmm_settings_sections() {
-        $sections = array(
-            array(
-                'id'    => 'ucmm_wpbrigade_setting',
-                'title' => __( 'Settings', 'ucmm-wpbrigade' ),
-                'desc'  => sprintf( __( 'Under Construction page is customizable through %1$sWordPress Customizer%2$s.', 'ucmm-wpbrigade' ), '<a href="' . admin_url( 'admin.php?page=under-construction-maintenance-mode' ) . '">', '</a>' ),
-            ),
-            // array(
-            //     'id'    => 'ucmm_wpbrigade_mc_lists',
-            //     'title' => __( 'MailChimp', 'ucmm-wpbrigade' ),
-            //     'desc'  => __( 'MailChimp Lists', 'ucmm-wpbrigade' ),
-            // ),
-            // array(
-            //     'id'    => 'ucmm_wpbrigade_seo',
-            //     'title' => __( 'SEO Configuration', 'ucmm-wpbrigade' ),
-            //     'desc'  => __( 'SEO Configuration', 'ucmm-wpbrigade' ),
-            // ),
-            // array(
-            //     'id'    => 'ucmm_wpbrigade_premium',
-            //     'title' => __( 'Try Primum Veriosn', 'ucmm-wpbrigade' )
-            // )
-        );
-        return $sections;
+
+
+    /**
+     * Displays the settings page. React root is displayed here.
+     *
+     * @version 3.0.0
+     * @return void
+     */
+    function plugin_page() {
+
+      echo '<div class="ucmm-settings-notices">';
+      /**
+       * Notices for the UCMM settings screen (after the banner).
+       *
+       * @since 3.0.0
+       */
+      do_action( 'ucmm_after_settings_banner' );
+      echo '</div>';
+
+      echo '<div id="ucmm-settings-root"></div>';
+
     }
 
     /**
-     * Returns all the settings fields
+     * Output the settings header banner before other admin notices.
      *
-     * @return array settings fields
+     * @return void
      */
-    function get_ucmm_settings_fields() {
+    public function ucmm_render_settings_banner() {
+      static $ucmm_banner_rendered = false;
 
-      global $wp_roles;
-			$ucmm_wpbrigade_roles = array();
-			$ucmm_staus_string = sprintf( __( 'Check the field to activate the maintenance mode.' , 'ucmm-wpbrigade' ) );
-			$ucmm_customizer_settings = get_option( 'ucmm_wpbrigade_customization' );
-			$ucmm_customizer_enable = isset( $ucmm_customizer_settings['ucmm_schedule_show_end_time'] ) ? $ucmm_customizer_settings['ucmm_schedule_show_end_time'] : false;
-				if( $ucmm_customizer_enable ) {
-					$ucmm_staus_string .= sprintf( __( '%3$s%3$s Note: Scheduling maintenance from customizer is the primary setting. This option will not work if you have enabled the scheduled maintenance mode. %3$s If you want to use the default maintenance (this option), please deactivate the maintenance schedule from %1$s customizer%2$s and set this option again.', 'ucmm-wpbrigade' ), '<a href="' . admin_url( 'admin.php?page=under-construction-maintenance-mode' ) . '">', '</a>','<br>' , 'ucmm-wpbrigade' );
-				}
-
-      foreach( $wp_roles->roles as $role => $val ) {
-
-        $ucmm_wpbrigade_roles['ucmm-wpbrigade_role_'.$role] = $val['name'];
+      if ( $ucmm_banner_rendered ) {
+        return;
       }
-      $settings_fields = array(
-        'ucmm_wpbrigade_setting' => array(
-            array(
-                'name'  => 'ucmm-status',
-                'label' => __( 'Activate:', 'ucmm-wpbrigade' ),
-                'desc'  => $ucmm_staus_string,
-                'type'  => 'checkbox',
-						),
-            array(
-              'name'                => 'ucmm-enable',
-              'label'               => __( 'Disable Mode For:', 'ucmm-wpbrigade' ),
-              'desc'                => __( 'Choose the roles to disable under construction mode for ', 'ucmm-wpbrigade' ),
-              'type'                => 'multicheck',
-              // 'default'             => array( 'ucmm-wpbrigade_role_administrator' => 'Administrator'),
-              'options'             => $ucmm_wpbrigade_roles
-            ),
-            array(
-              'name'  => 'ucmm-uninstall',
-              'label' => __( 'Reset Settings on Uninstall:', 'ucmm-wpbrigade' ),
-              'desc'  => __( 'Reset settings to default upon uninstall.' , 'ucmm-wpbrigade' ),
-              'type'  => 'checkbox',
-            ),
-          ),
-        // 'ucmm_wpbrigade_seo' => array(
-        //   array(
-        //       'name'              => 'ucmm-seo-locale',
-        //       'label'             => __( 'SEO Locale', 'ucmm-wpbrigade' ),
-        //       'desc'              => __( 'Text input description', 'ucmm-wpbrigade' ),
-        //       'placeholder'       => get_bloginfo('language'),
-        //       'type'              => 'text',
-        //       'sanitize_callback' => 'sanitize_text_field'
-        //   ),
-        //   array(
-        //       'name'              => 'ucmm-seo-type',
-        //       'label'             => __( 'SEO Type', 'ucmm-wpbrigade' ),
-        //       'desc'              => __( 'Text input description', 'ucmm-wpbrigade' ),
-        //       'placeholder'       => __( 'website', 'ucmm-wpbrigade' ),
-        //       'type'              => 'text',
-        //       'sanitize_callback' => 'sanitize_text_field'
-        //   ),
-        //   array(
-        //       'name'              => 'ucmm-seo-title',
-        //       'label'             => __( 'SEO Title', 'ucmm-wpbrigade' ),
-        //       'desc'              => __( 'Text input description', 'ucmm-wpbrigade' ),
-        //       'placeholder'       => get_bloginfo('name'),
-        //       'type'              => 'text',
-        //       'sanitize_callback' => 'sanitize_text_field'
-        //   ),
-        //   array(
-        //       'name'              => 'ucmm-seo-desc',
-        //       'label'             => __( 'SEO Description', 'ucmm-wpbrigade' ),
-        //       'desc'              => __( 'Text input description', 'ucmm-wpbrigade' ),
-        //       'placeholder'       => __( 'Text Input placeholder', 'ucmm-wpbrigade' ),
-        //       'type'              => 'text',
-        //       'sanitize_callback' => 'sanitize_text_field'
-        //   ),
-        //   array(
-        //       'name'              => 'ucmm-seo-url',
-        //       'label'             => __( 'SEO URL', 'ucmm-wpbrigade' ),
-        //       'desc'              => __( 'Text input description', 'ucmm-wpbrigade' ),
-        //       'placeholder'       => get_bloginfo('url'),
-        //       'type'              => 'text',
-        //       'sanitize_callback' => 'sanitize_text_field'
-        //   ),
-        //   array(
-        //       'name'              => 'ucmm-seo-site-name',
-        //       'label'             => __( 'SEO Site Name', 'ucmm-wpbrigade' ),
-        //       'desc'              => __( 'Text input description', 'ucmm-wpbrigade' ),
-        //       'placeholder'       => get_bloginfo('name'),
-        //       'type'              => 'text',
-        //       'sanitize_callback' => 'sanitize_text_field'
-        //   ),
-        //   array(
-        //       'name'              => 'ucmm-seo-keyword',
-        //       'label'             => __( 'SEO Keyword', 'ucmm-wpbrigade' ),
-        //       'desc'              => __( 'Text input description', 'ucmm-wpbrigade' ),
-        //       'placeholder'       => __( 'Text Input placeholder', 'ucmm-wpbrigade' ),
-        //       'type'              => 'text',
-        //       'sanitize_callback' => 'sanitize_text_field'
-        //   ),
-        // ),
-        // 'ucmm_wpbrigade_mc_lists' => array(
-        //   array(
-        //     'name'  => 'ucmm-mc-api-key',
-        //     'label' => __( 'API Key:', 'ucmm-wpbrigade' ),
-        //     'desc'  => __( 'Mail Chimp Key.', 'ucmm-wpbrigade' ),
-        //     'type'  => 'text'
-        //   ),
-        //   array(
-        //     'name'    => 'selectbox',
-        //     'label'   => __( 'Lists', 'ucmm-wpbrigade' ),
-        //     'desc'    => __( 'Select the List', 'ucmm-wpbrigade' ),
-        //     'type'    => 'select',
-        //     'default' => 'no',
-        //     'options' => array(
-        //         // 'yes' => '55555555555555555',
-        //         // 'no'  => '66666666666666666'
-        //     )
-        //   ),
-        // ),
+
+      $ucmm_banner_rendered = true;
+
+      echo '<div class="ucmm-settings-banner-wrap">';
+      include UCMM_WPBRIGADE_DIR_PATH . 'includes/settings-banner.php';
+      echo '</div>';
+    }
+
+    /**
+     * Enqueue React assets for the settings page
+     *
+     * @version 3.0.0
+     * @return void
+     */
+    function ucmm_enqueue_react_assets() {
+
+      add_action( 'admin_notices', array( $this, 'ucmm_render_settings_banner' ), 1 );
+
+      $build_js = UCMM_WPBRIGADE_DIR_PATH . 'build/index.js';
+
+      if ( ! file_exists( $build_js ) ) {
+        add_action( 'ucmm_after_settings_banner', array( $this, 'ucmm_missing_build_notice' ) );
+        return;
+      }
+
+      // Enqueue React build assets
+      $asset_file = UCMM_WPBRIGADE_DIR_PATH . 'build/index.asset.php';
+      $asset_data = file_exists( $asset_file ) ? require( $asset_file ) : array( 'dependencies' => array(), 'version' => UCMM_WPBRIGADE_VERSION );
+
+      wp_enqueue_script(
+        'ucmm-react-settings',
+        UCMM_WPBRIGADE_DIR_URL . 'build/index.js',
+        $asset_data['dependencies'],
+        $asset_data['version'],
+        true
       );
 
-      return $settings_fields;
-    }
+      wp_enqueue_style(
+        'ucmm-inter-font',
+        'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap', // phpcs:ignore
+        array(),
+        null
+      );
 
-    function plugin_page() {
-        echo '<div class="wrap ucmm-wpbrigade">';
-        echo '<h2>' . __( 'Under Construction: Settings', 'ucmm-wpbrigade' ) . '</h2><br />';
-        $this->settings_api->show_navigation();
-        $this->settings_api->show_forms();
+      wp_enqueue_style(
+        'ucmm-react-settings',
+        UCMM_WPBRIGADE_DIR_URL . 'build/index.css',
+        array( 'ucmm-inter-font' ),
+        $asset_data['version']
+      );
 
-        echo '</div>';
+      // Localize script with admin data
+      wp_localize_script(
+        'ucmm-react-settings',
+        'ucmmAdmin',
+        array(
+          'apiUrl' => home_url( '/wp-json/' ),
+          'nonce'  => wp_create_nonce( 'wp_rest' ),
+          'customizerUrl' => ucmm_wpbrigade_get_customizer_url(),
+          'currentUser' => wp_get_current_user(),
+          'pluginUrl' => UCMM_WPBRIGADE_DIR_URL,
+        )
+      );
+
+      wp_set_script_translations( 'ucmm-react-settings', 'ucmm-wpbrigade', UCMM_WPBRIGADE_DIR_PATH . 'languages' );
     }
 
     /**
-     * Get all the pages
+     * Warn when the React settings build is missing.
      *
-     * @return array page names with key value pairs
+     * @return void
      */
-    function get_pages() {
-        $pages = get_pages();
-        $pages_options = array();
-        if ( $pages ) {
-            foreach ($pages as $page) {
-                $pages_options[$page->ID] = $page->post_title;
-            }
-        }
-
-        return $pages_options;
+    function ucmm_missing_build_notice() {
+      echo '<div class="notice notice-error"><p>';
+      echo esc_html__(
+        'Under Construction settings UI could not load because build/index.js is missing.
+        Run npm install && npm run build in the plugin directory.',
+        'ucmm-wpbrigade'
+      );
+      echo '</p></div>';
     }
+
+
+
+
     /**
      * get info
      * @since 1.0.5
      */
     public function ucmm_help_page() {
 
-		 include UCMM_WPBRIGADE_DIR_PATH . 'classes/ucmm-logs.php';
+		include UCMM_WPBRIGADE_DIR_PATH . 'classes/ucmm-logs.php';
 
-			$html = '<div class="ucmm-wpbrigade-help-page">';
-			$html .= '<h2>Help & Troubleshooting</h2>';
-			$html .= sprintf( __( 'Free support is available on the %1$s plugin support forums%2$s.', 'ucmm-wpbrigade' ), '<a href="https://wordpress.org/support/plugin/under-construction-maintenance-mode" target="_blank">', '</a>' );
-			$html .="<br /><br />";
-			$html .= 'Found a bug or have a feature request? Please submit an issue <a href="https://wpbrigade.com/contact/" target="_blank">here</a>!';
-			$html .= '<pre><textarea rows="25" cols="75" readonly="readonly">';
-			$html .= Uccm_Logs_Info::get_sysinfo();
-			$html .= '</textarea></pre>';
-			$html .= '<input type="button" class="button ucmm-wpbrigade-log-file" value="' . __( 'Download Log File', 'ucmm-wpbrigade' ) . '"/>';
-			$html .= '<span class="ucmm-log-file-sniper"><img src="'. admin_url( 'images/wpspin_light.gif' ) .'" /></span>';
-			$html .= '<span class="ucmm-log-file-text">Under Construction Log File Downloaded Successfully!</span>';
-			$html .= '</div>';
-			echo $html;
+		$support_text = sprintf(
+			/* translators: 1: opening anchor tag, 2: closing anchor tag */
+			__( 'Free support is available on the %1$splugin support forums%2$s.', 'ucmm-wpbrigade' ),
+			'<a href="https://wordpress.org/support/plugin/under-construction-maintenance-mode" target="_blank" rel="noopener noreferrer">',
+			'</a>'
+		);
+
+		$bug_report_text = sprintf(
+			/* translators: %s: link to contact page */
+			__( 'Found a bug or have a feature request? Please submit an issue %s!', 'ucmm-wpbrigade' ),
+			'<a href="https://wpbrigade.com/contact/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'here', 'ucmm-wpbrigade' ) . '</a>'
+		);
+
+		$description = wp_kses_post( $support_text . '<br>' . $bug_report_text );
+		?>
+		<div class="wrap ucmm-wpbrigade">
+			<div class="wpbr-tabs-wrapper">
+				<div id="ucmm_wpbrigade_setting" class="ucmm-wpbrigade-help-page">
+					<div class="ucmm-settings-card">
+						<div class="ucmm-settings-card-header">
+							<div class="ucmm-settings-title-row">
+								<h3><?php esc_html_e( 'Help & Troubleshooting', 'ucmm-wpbrigade' ); ?></h3>
+							</div>
+							<p class="ucmm-settings-card-description">
+								<?php echo $description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses_post above. ?>
+							</p>
+						</div>
+						<div class="ucmm-help-sysinfo">
+							<div class="ucmm-help-sysinfo__box">
+								<button
+									type="button"
+									class="ucmm-help-sysinfo-copy"
+									aria-label="<?php esc_attr_e( 'Copy system info', 'ucmm-wpbrigade' ); ?>"
+									aria-describedby="ucmm-help-sysinfo-copy-tooltip"
+								>
+									<span
+										id="ucmm-help-sysinfo-copy-tooltip"
+										class="ucmm-help-sysinfo-copy__tooltip"
+										role="tooltip"
+									><?php esc_html_e( 'Copy', 'ucmm-wpbrigade' ); ?></span>
+									<span class="ucmm-help-sysinfo-copy__icon" aria-hidden="true">
+										<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+											<path fill="#646970" d="M12.668 10.667c0-.71 0-1.204-.031-1.588a2.4 2.4 0 0 0-.113-.615l-.055-.13a1.84 1.84 0 0 0-.676-.731l-.127-.072c-.158-.08-.37-.137-.745-.168-.384-.031-.877-.031-1.588-.031H6.5c-.711 0-1.204 0-1.588.031a2.4 2.4 0 0 0-.615.113l-.13.055a1.84 1.84 0 0 0-.731.676l-.07.127c-.081.158-.138.37-.169.745-.031.384-.032.877-.032 1.588V13.5c0 .711 0 1.204.032 1.588.031.376.088.587.168.745l.07.126c.177.288.43.522.732.676l.13.056c.144.052.333.089.615.112.384.031.877.032 1.588.032h2.833c.71 0 1.204 0 1.588-.032.376-.031.587-.088.745-.168l.127-.07c.287-.177.522-.43.676-.732l.055-.13c.052-.144.09-.333.113-.615.031-.384.031-.877.031-1.588zm1.33 1.998c.455-.002.803-.005 1.09-.028.376-.031.587-.088.745-.168l.126-.071c.288-.177.522-.43.676-.732l.056-.13a2.4 2.4 0 0 0 .112-.615c.031-.384.032-.877.032-1.588V6.5c0-.711 0-1.204-.032-1.588a2.4 2.4 0 0 0-.112-.615l-.056-.13a1.84 1.84 0 0 0-.676-.731l-.126-.07c-.158-.081-.37-.138-.745-.169-.384-.031-.877-.032-1.588-.032h-2.833c-.71 0-1.204.001-1.588.032-.282.023-.471.06-.615.112l-.13.056a1.84 1.84 0 0 0-.731.676l-.072.126c-.08.158-.137.37-.168.745-.023.287-.027.635-.029 1.09h1.999c.689 0 1.246 0 1.696.036.458.038.865.117 1.242.309l.217.122c.496.304.9.74 1.165 1.26l.067.143c.144.337.21.698.242 1.099.037.45.036 1.007.036 1.696zm4.167-3.332c0 .689 0 1.246-.036 1.696-.033.401-.098.762-.242 1.099l-.067.143c-.265.52-.67.956-1.165 1.26l-.219.122c-.376.192-.782.271-1.24.309-.337.027-.734.031-1.2.033-.003.467-.007.864-.034 1.201-.033.401-.098.762-.242 1.098l-.067.142c-.265.522-.669.958-1.165 1.262l-.217.122c-.377.192-.784.271-1.242.309-.45.037-1.007.036-1.696.036H6.5c-.69 0-1.246 0-1.696-.036-.4-.033-.762-.098-1.098-.242l-.143-.067a3.17 3.17 0 0 1-1.261-1.165l-.122-.219c-.192-.376-.271-.782-.309-1.24-.037-.45-.036-1.007-.036-1.696v-2.833c0-.689 0-1.246.036-1.696.038-.458.117-.865.309-1.242l.122-.217c.304-.496.74-.9 1.261-1.165l.143-.067c.336-.144.697-.21 1.098-.242.337-.027.733-.032 1.2-.034.002-.467.007-.863.034-1.2.037-.458.117-.864.309-1.24l.122-.22c.304-.495.74-.899 1.26-1.164l.143-.067c.337-.144.698-.21 1.099-.242.45-.037 1.007-.036 1.696-.036H13.5c.69 0 1.246 0 1.696.036.458.038.864.117 1.24.309l.22.122c.495.304.899.74 1.164 1.261l.067.143c.144.336.21.697.242 1.098.037.45.036 1.007.036 1.696z"/>
+										</svg>
+									</span>
+								</button>
+								<textarea class="ucmm-help-sysinfo__textarea" rows="25" readonly><?php echo esc_textarea( Uccm_Logs_Info::get_sysinfo() ); ?></textarea>
+							</div>
+						</div>
+						<div class="ucmm-settings-actions">
+							<input
+								type="button"
+								class="ucmm-button-primary ucmm-wpbrigade-log-file"
+								value="<?php esc_attr_e( 'Download Log File', 'ucmm-wpbrigade' ); ?>"
+							/>
+							<span class="ucmm-log-file-sniper" aria-hidden="true">
+								<img src="<?php echo esc_url( admin_url( 'images/wpspin_light.gif' ) ); ?>" alt="" />
+							</span>
+							<div
+								class="ucmm-notice ucmm-notice--inline ucmm-notice-success ucmm-log-file-text"
+								role="status"
+								aria-hidden="true"
+							>
+								<p><?php esc_html_e( 'Under Construction Log File Downloaded Successfully!', 'ucmm-wpbrigade' ); ?></p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<?php
     }
     /**
      * call back function of download help ajax

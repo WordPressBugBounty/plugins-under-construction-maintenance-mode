@@ -67,43 +67,13 @@ if ( ! class_exists( 'UCMM_Plugin_Meta' ) ) :
 			if ( $file == $this_plugin ) {
 
 				$settings_link = sprintf( esc_html__( '%1$s Settings %2$s | %3$s Customize %4$s', 'ucmm-wpbrigade' ), '<a href="' . admin_url( 'admin.php?page=ucmm_settings' ) . '">', '</a>', '<a href="' . admin_url( 'admin.php?page=under-construction-maintenance-mode' ) . '">', '</a>' );
-				
-				$sdk_data = json_decode(get_option('wpb_sdk_under-construction-maintenance-mode'), true);
-				// Initialize the options or set defaults if not found
-				$communication   = isset($sdk_data['communication']) ? $sdk_data['communication'] : '0';
-				$diagnostic_info = isset($sdk_data['diagnostic_info']) ? $sdk_data['diagnostic_info'] : '0';
-				$extensions      = isset($sdk_data['extensions']) ? $sdk_data['extensions'] : '0';
 
-				// Check if any option is set to '1' and build the settings link
-				if ('1' == $communication || '1' == $diagnostic_info || '1' == $extensions) {
-					$settings_link .= sprintf(esc_html__('|  %1$s Opt Out %2$s ', 'under-construction-maintenance-mode'), '<a class="opt-out" href="' . admin_url('admin.php?page=ucmm_settings') . '">', '</a>');
-				} else {
-					if('yes' == get_option( '_ucmm_optin' )) {
-                        update_option('_ucmm_optin', 'no');
-                    }
-					$settings_link .= sprintf(esc_html__('|  %1$s Opt In %2$s ', 'under-construction-maintenance-mode'),'<a href="' . admin_url('admin.php?page=ucmm-optin') . '">','</a>');
-				}
-				
 				array_unshift( $links, $settings_link );
 
 			}
 
 			return $links;
 		}
-
-		// /**
-		//  * Add deactivate modal layout.
-		//  * @since 1.0.1
-		//  */
-		// public function ucmm_add_deactive_modal() {
-		// 	global $pagenow;
-
-		// 	if ( 'plugins.php' !== $pagenow ) {
-		// 		return;
-		// 	}
-
-		// 	include UCMM_WPBRIGADE_DIR_PATH . 'includes/deactivate_modal.php';
-		// }
 
 		/**
 		 * Set time to current so review notice will popup after 14 days
@@ -156,6 +126,25 @@ if ( ! class_exists( 'UCMM_Plugin_Meta' ) ) :
 		}
 
 		/**
+		 * Whether the current screen is the UCMM settings page.
+		 *
+		 * @since 3.0.0
+		 * @return bool
+		 */
+		private function ucmm_is_settings_screen() {
+
+			if ( function_exists( 'get_current_screen' ) ) {
+				$screen = get_current_screen();
+
+				if ( $screen && 'toplevel_page_ucmm_settings' === $screen->id ) {
+					return true;
+				}
+			}
+
+			return isset( $_GET['page'] ) && 'ucmm_settings' === sanitize_key( wp_unslash( $_GET['page'] ) );
+		}
+
+		/**
 		 * Review notice message
 		 *
 		 * @since  1.0.1
@@ -179,9 +168,9 @@ if ( ! class_exists( 'UCMM_Plugin_Meta' ) ) :
 				  <p><?php _e( 'We hope you\'ve enjoyed using Under Construction & Maintenance Mode! Would you consider leaving us a review on WordPress.org?', 'ucmm-wpbrigade' ); ?></p>
 				  <ul class="ucmm-review-ul">
 			<li><a href="https://wordpress.org/support/view/plugin-reviews/under-construction-maintenance-mode?rate=5#postform" target="_blank"><span class="dashicons dashicons-external"></span><?php _e( 'Sure! I\'d love to!', 'ucmm-wpbrigade' ); ?></a></li>
-			<li><a href="<?php echo $dismiss_url; ?>"><span class="dashicons dashicons-smiley"></span><?php _e( 'I\'ve already left a review', 'ucmm-wpbrigade' ); ?></a></li>
-			<li><a href="<?php echo $later_url; ?>"><span class="dashicons dashicons-calendar-alt"></span><?php _e( 'Maybe Later', 'ucmm-wpbrigade' ); ?></a></li>
-			<li><a href="<?php echo $dismiss_url; ?>"><span class="dashicons dashicons-dismiss"></span><?php _e( 'Never show again', 'ucmm-wpbrigade' ); ?></a></li></ul>
+			<li><a href="<?php echo esc_url( $dismiss_url ); ?>"><span class="dashicons dashicons-smiley"></span><?php _e( 'I\'ve already left a review', 'ucmm-wpbrigade' ); ?></a></li>
+			<li><a href="<?php echo esc_url( $later_url ); ?>"><span class="dashicons dashicons-calendar-alt"></span><?php _e( 'Maybe Later', 'ucmm-wpbrigade' ); ?></a></li>
+			<li><a href="<?php echo esc_url( $dismiss_url ); ?>"><span class="dashicons dashicons-dismiss"></span><?php _e( 'Never show again', 'ucmm-wpbrigade' ); ?></a></li></ul>
 			  </div>
 		  </div>
 			<?php

@@ -8,7 +8,7 @@
  */
 
 $ucmm_settings = get_option( 'ucmm_wpbrigade_setting' );
-if ( isset( $ucmm_settings['ucmm-status'] ) && 'on' != $ucmm_settings['ucmm-status'] ) {
+if ( ! isset( $ucmm_settings['ucmm-uninstall'] ) || 'on' !== $ucmm_settings['ucmm-uninstall'] ) {
 	return;
 }
 

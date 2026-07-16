@@ -3,7 +3,7 @@
  * Plugin Name: Under Construction & Maintenance Mode
  * Plugin URI: https://wpbrigade.com/wordpress/plugins/under-construction-maintenance-mode/?utm_source=ucmm-org&utm_medium=plugin-url-link
  * Description: This plugin will Display an Under Construction, Maintenance Mode or Coming Soon landing Page that takes 5 seconds to setup, while you're doing maintenance work on your site.
- * Version: 2.1.2
+ * Version: 3.0.0
  * Author: WPBrigade
  * Author URI: https://www.WPBrigade.com/?utm_source=ucmm-org&utm_medium=author-url-link
  * Requires at least: 5.0
@@ -20,43 +20,77 @@
  *UnderConstruction main class.
  */
 
- 
-    if ( ! function_exists( 'ucmm_wpb50659630' ) ) {
-        // Create a helper function for easy SDK access.
-        function ucmm_wpb50659630() {
-            global $ucmm_wpb50659630;
+if ( ! function_exists( 'ucmm_wpb50659630' ) ) {
+	/**
+	 * Create a helper function for easy SDK access.
+	 *
+	 * @return mixed
+	 */
+	function ucmm_wpb50659630() {
+		global $ucmm_wpb50659630;
 
-            if ( ! isset( $ucmm_wpb50659630 ) ) {
-                // Include Telemetry SDK.
-                require_once dirname(__FILE__) . '/lib/wpb-sdk/start.php';
+		if ( ! isset( $ucmm_wpb50659630 ) || ! is_array( $ucmm_wpb50659630 ) ) {
+			require_once __DIR__ . '/lib/wpb-sdk/start.php';
 
-                $ucmm_wpb50659630 = wpb_dynamic_init([
-                    'id'                  => '1',
-                    'slug'                => 'under-construction-maintenance-mode',
-                    'type'                => 'plugin',
-                    'public_key'          => '1|4aOA8EuyIN4pi2miMvC23LLpnHbBZFNki9R9pVmwd673d3c8',
-                    'secret_key'          => 'sk_b36c525848fee035',
-                    'is_premium'          => false,
-                    'has_addons'          => false,
-                    'has_paid_plans'      => false,
-                    'menu'                => [
-                        'slug'           => 'under-construction-maintenance-mode',
-                        'account'        => false,
-                        'support'        => false,
-                    ],
-                    'settings'           => [ 'ucmm_wpbrigade_setting' => '' , 'ucmm_wpbrigade_customization' => '' ],
-                ]);
-            }
+			/**
+			 * Initialize WPB SDK.
+			 *
+			 * @phpstan-ignore-next-line
+			 */
+			$ucmm_wpb50659630 = wpb_sdk_dynamic_init(
+				array(
+					'id'              => '4',
+					'slug'            => 'under-construction-maintenance-mode',
+					'type'            => 'plugin',
+					'plugin_file'     => __FILE__,
+					'sdk_views_dir'   => __DIR__ . '/lib/wpb-sdk/views',
+					'public_key'      => '6|UcBLS0QM3JhN7qLFJWwaDTNvRzy11IW9suqtBdzi2c52a64a',
+					'secret_key'      => 'sk_b36c525848fee035',
+					'is_premium'      => false,
+					'has_addons'      => false,
+					'has_paid_plans'  => false,
+					'optin_user_meta' => array(
+						'token'          => '_ucmm_verification_token',
+						'email_verified' => '_ucmm_email_verified',
+					),
+					'optin'           => array(
+						'option_name'       => '_ucmm_optin',
+						'settings_page'     => 'ucmm_settings',
+						'optin_page'        => 'ucmm-optin',
+						'verify_query_args' => array(
+							'under-construction-maintenance-mode_optin_verify',
+							'ucmm_optin_verify',
+						),
+						'ajax_prefix'       => 'ucmm',
+						'product_name'      => 'Under Construction & Maintenance Mode',
+					),
+					'telemetry'       => array(
+						'optout_submit_key' => 'ucmm-submit-optout',
+					),
+					'menu'            => array(
+						'slug'    => 'under-construction-maintenance-mode',
+						'account' => false,
+						'support' => false,
+					),
+					'settings'        => array(
+						'ucmm_wpbrigade_setting'                                      => '',
+						'ucmm_wpbrigade_customization'                                => '',
+						'_ucmm_optin'                                                 => '',
+						'wpb_sdk_under-construction-maintenance-mode'                 => '',
+						'wpb_sdk_under-construction-maintenance-mode_fallback_verify_token' => '',
+						'wpb_sdk_under-construction-maintenance-mode_initial_log_sent' => '',
+					),
+				)
+			);
+		}
 
-            return $ucmm_wpb50659630;
-        }
+		return $ucmm_wpb50659630;
+	}
 
-        // Init Telemetry.
-        ucmm_wpb50659630();
-        // Signal that SDK was initiated.
-        do_action( 'ucmm_wpb50659630_loaded' );
-    }
-    
+	ucmm_wpb50659630();
+	do_action( 'ucmm_wpb50659630_loaded' );
+}
+
 
 if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 
@@ -65,7 +99,7 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 		/**
 		 * @var string
 		 */
-		public $version = '2.1.2';
+		public $version = '3.0.0';
 
 		/**
 		 * @var array
@@ -111,8 +145,7 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 			add_action( 'init', array( $this, 'ucmm_redirect_customizer' ) );
 			add_action( 'init', array( $this, 'ucmm_set_setting' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'ucmm_admin_scripts' ) );
-			add_action( 'wp', array( $this, 'ucmm_parse_request' ), 10, 1 ); 
-			add_action( 'admin_menu', array( $this, 'ucmm_callback_url' ), 99 );
+			add_action( 'wp', array( $this, 'ucmm_parse_request' ), 10, 1 );
 
 			// add_action( 'wp_ajax_ucmm_deactivate', array( $this, 'ucmm_deactivate' ) );
 			add_action( 'customize_controls_enqueue_scripts', array( $this, 'ucmm_customizer_js' ) );
@@ -122,9 +155,8 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 			add_action( 'admin_footer', array( $this, 'ucmm_admin_css' ), 11 );
 
 			add_action( 'admin_init', array( $this, 'redirect_optin' ) );
-			add_action( 'admin_footer', array( $this, 'add_deactivate_modal' ) );
-			add_action('admin_menu', array($this, 'register_ucmm_optin_page'));
-			add_action( 'wp_ajax_ucmm_optout_yes', array( $this, 'optout_yes' ) );
+			// After UCMM_WPBrigade_Setting registers ucmm_settings (includes() runs after _hooks()).
+			add_action( 'admin_menu', array( $this, 'register_ucmm_optin_page' ), 20 );
 			add_action( 'wp_wpb_sdk_after_uninstall', array( $this, 'plugin_uninstallation' ) );
 
 		}
@@ -133,10 +165,15 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 		 * Summary of register_ucmm_optin_page
 		 * @since 1.5.4
 		 */
-		function register_ucmm_optin_page()
-		{
-			add_submenu_page( 'under-construction-maintenance-mode', __('Activate', 'under-construction-maintenance-mode'), __('Activate', 'under-construction-maintenance-mode'),'manage_options', 'ucmm-optin', array($this, 'ucmm_render_optin_page'));
-
+		function register_ucmm_optin_page() {
+			add_submenu_page(
+				'ucmm_settings',
+				__( 'Activate', 'ucmm-wpbrigade' ),
+				' ',
+				'manage_options',
+				'ucmm-optin',
+				array( $this, 'ucmm_render_optin_page' )
+			);
 		}
 
 		/**
@@ -144,51 +181,9 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 		 * @since 1.5.4
 		 */
 		function ucmm_render_optin_page() {
-			include plugin_dir_path(__FILE__) . 'includes/ucmm_optin_form.php';
-		}
-		
-		/**
-		 * Summary of add_deactivate_modal
-		 * @since 1.5.4
-		 */
-		function add_deactivate_modal() {
-			global $pagenow;
-
-			if ( 'plugins.php' !== $pagenow ) {
-				return;
+			if ( function_exists( 'wpb_sdk_render_optin_form' ) ) {
+				wpb_sdk_render_optin_form( 'under-construction-maintenance-mode' );
 			}
-
-			include plugin_dir_path(__FILE__) . 'includes/ucmm_optout_form.php';
-		}
-
-		/**
-		 * Summary of add_deactivate_modal
-		 * @since 1.5.4
-		 */
-		function optout_yes() {
-
-			if( ! current_user_can( 'manage_options' ) || ! check_ajax_referer( 'ucmm-optout-nonce', 'optout_nonce' ) ){
-				wp_die( '<p>' . __( 'Sorry, you are not allowed to edit this item.' ) . '</p>', 403 );
-			}
-
-            // Get the current option and decode it as an associative array
-            $sdk_data = json_decode(get_option('wpb_sdk_under-construction-maintenance-mode'), true);
-
-            // If there is no current option, initialize an empty array
-            if (!$sdk_data) {
-                $sdk_data = array();
-            }
-
-            $setting_name = $_POST['setting_name'];  // e.g., communication, diagnostic_info, extensions
-            $setting_value = $_POST['setting_value'];  // The new value to be updated
-
-            // Update the specific setting in the array
-            $sdk_data[$setting_name] = $setting_value;
-
-            // Encode the array back into a JSON string and update the option
-            update_option('wpb_sdk_under-construction-maintenance-mode', json_encode($sdk_data));
-
-			wp_die();
 		}
 
         /**
@@ -196,8 +191,11 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 		 * 
          * @since 2.1.0
          */
-		function plugin_uninstallation() {
-            include_once ( UCMM_WPBRIGADE_DIR_PATH . 'includes/uninstall.php' );
+		function plugin_uninstallation( $slug = '' ) {
+			if ( 'under-construction-maintenance-mode' !== $slug ) {
+				return;
+			}
+			include_once UCMM_WPBRIGADE_DIR_PATH . 'includes/uninstall.php';
 		}
 
 		/**
@@ -205,65 +203,45 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 		 * @since 1.5.4
 		 */
 		function redirect_optin() {
+			if ( ! current_user_can( 'manage_options' ) ) {
+				return;
+			}
 
-			/**
-			 * Fix the Broken Access Control (BAC) security fix.
-			 *
-			 * @since 1.6.3
-			 */
-			if ( current_user_can( 'manage_options' ) ) {
-				if ( isset( $_POST['ucmm-submit-optout'] ) ) {
-					if ( ! wp_verify_nonce( sanitize_text_field( $_POST['ucmm_submit_optin_nonce'] ), 'ucmm_submit_optin_nonce' ) ) {
-						return;
-					}
-					update_option( '_ucmm_optin', 'no' );
-                    // Retrieve WPB SDK existing option and set user_skip
-                    $sdk_data = json_decode(get_option('wpb_sdk_under-construction-maintenance-mode'), true);
-                    $sdk_data['user_skip'] = '1';
-                    $sdk_data_json = json_encode($sdk_data);
-                    update_option('wpb_sdk_under-construction-maintenance-mode', $sdk_data_json);
-				} elseif ( isset( $_POST['ucmm-submit-optin'] ) ) {
-					if ( ! wp_verify_nonce( sanitize_text_field( $_POST['ucmm_submit_optin_nonce'] ), 'ucmm_submit_optin_nonce' ) ) {
-						return;
-					}
-					update_option( '_ucmm_optin', 'yes' );
-                    //WPB SDK OPT IN OPTIONS
-                    $sdk_data = array(
-                        'communication'   => '1',
-                        'diagnostic_info' => '1',
-                        'extensions'      => '1',
-                        'user_skip'      => '0',
-                    );
-                    $sdk_data_json = json_encode($sdk_data);
-                    update_option('wpb_sdk_under-construction-maintenance-mode', $sdk_data_json);
-				} elseif ( ! get_option( '_ucmm_optin' ) && isset( $_GET['page'] ) && ( $_GET['page'] === 'ucmm_settings' || $_GET['page'] === 'under-construction-maintenance-mode' || $_GET['page'] === 'ucmm_settings' || $_GET['page'] === 'abw' ) ) {
+			$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['page'] ) ) : '';
+			$decision = function_exists( 'wpb_sdk_get_optin_decision' )
+				? wpb_sdk_get_optin_decision( 'under-construction-maintenance-mode' )
+				: (string) get_option( '_ucmm_optin', '' );
 
-				/**
-				 * XSS Attack vector found and fixed.
-				 *
-				 * @since 1.5.11
-				 */
-
-				$page_redirect = '';
-
-				if (isset($_GET['page'])) {
-					if ($_GET['page'] === 'ucmm_settings') {
-						$page_redirect = 'ucmm_settings';
-					} elseif ($_GET['page'] === 'under-construction-maintenance-mode') {
-						$page_redirect = 'under-construction-maintenance-mode';
-					}
-				}
-				
-				wp_redirect( admin_url('admin.php?page=ucmm-optin&redirect-page=' . $page_redirect) );
+			if (
+				$page
+				&& in_array( $page, array( 'ucmm_settings', 'under-construction-maintenance-mode' ), true )
+				&& '' === $decision
+			) {
+				$page_redirect = 'ucmm_settings' === $page ? 'ucmm_settings' : 'under-construction-maintenance-mode';
+				wp_safe_redirect(
+					admin_url( 'admin.php?page=ucmm-optin&redirect-page=' . rawurlencode( $page_redirect ) )
+				);
 				exit;
+			}
 
-				} elseif ( get_option( '_ucmm_optin' ) && ( get_option( '_ucmm_optin' ) == 'yes' ) && isset( $_GET['page'] ) && $_GET['page'] === 'ucmm-optin' ) {
-					wp_redirect( admin_url( 'admin.php?page=ucmm_settings' ) );
-					exit;
-				}
+			if (
+				(
+					function_exists( 'wpb_sdk_should_redirect_from_optin_page' )
+						? wpb_sdk_should_redirect_from_optin_page( 'under-construction-maintenance-mode' )
+						: ( 'yes' === $decision )
+				)
+				&& 'ucmm-optin' === $page
+			) {
+				wp_safe_redirect( admin_url( 'admin.php?page=ucmm_settings' ) );
+				exit;
 			}
 		}
 
+		/**
+		 * Includes all the necessary PHP files
+		 *
+		 * @version 3.0.0
+		 */
 		public function includes() {
 
 			include_once UCMM_WPBRIGADE_DIR_PATH . 'classes/customizer.php';
@@ -271,6 +249,7 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 			include_once UCMM_WPBRIGADE_DIR_PATH . 'classes/ucmm-wpbrigade-setup.php';
 			new UCMM_WPBrigade_Setting();
 			include_once UCMM_WPBRIGADE_DIR_PATH . 'classes/plugin-meta.php';
+			include_once UCMM_WPBRIGADE_DIR_PATH . 'classes/ucmm-rest-api.php';
 
 		}
 
@@ -300,12 +279,11 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 
 		function ucmm_redirect_customizer() {
 
-			if ( ! empty( $_GET['page'] ) ) {
-				if ( $_GET['page'] == 'under-construction-maintenance-mode' ) {
-					$customizer_url = home_url() . '/ucmm-customize.php/?watch=ucmm-customizer&customize=ucmm';
-					wp_redirect( admin_url() . 'customize.php?url=' . rawurlencode( $customizer_url ) );
-
-					// wp_redirect(get_admin_url()."customize.php?url=".home_url()."/ucmm-customize.php?watch=ucmm-customizer");
+			if ( ! empty( $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$page = sanitize_text_field( wp_unslash( $_GET['page'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				if ( 'under-construction-maintenance-mode' === $page ) {
+					wp_safe_redirect( ucmm_wpbrigade_get_customizer_url() );
+					exit;
 				}
 			}
 
@@ -319,28 +297,21 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 		 * @since 1.0.6
 		 */
 		function is_ucmm_time() {
-
-			if ( get_option( 'timezone_string' ) ) {
-				date_default_timezone_set( get_option( 'timezone_string' ) );
-			}
-				// the timezone will be auto set according to the server timezone
-			else{
-				date_default_timezone_set( date_default_timezone_get() );
-			}
-			$ucmm_customize_settings = get_option( 'ucmm_wpbrigade_setting' );
 			$ucmm_now            = time();
 			$schedule_start      = isset( $this->ucmm_customize_settings['ucmm_schedule_start'] ) ? $this->ucmm_customize_settings['ucmm_schedule_start'] : null;
-			$ucmm_schedule_start = isset( $schedule_start ) ? strtotime( $schedule_start ) : false;
+			$ucmm_schedule_start = ucmm_wpbrigade_schedule_to_timestamp( $schedule_start );
 			$schedule_end        = isset( $this->ucmm_customize_settings['ucmm_schedule_end'] ) ? $this->ucmm_customize_settings['ucmm_schedule_end'] : null;
+			$ucmm_schedule_end   = ucmm_wpbrigade_schedule_to_timestamp( $schedule_end );
 
-			$ucmm_schedule_end = isset( $schedule_end ) ? strtotime( $schedule_end ) : false;
-
-			if ( $ucmm_now > $ucmm_schedule_start && $ucmm_now <= $ucmm_schedule_end   ) {
-				return true;
-			} else {
+			if ( false === $ucmm_schedule_start || false === $ucmm_schedule_end ) {
 				return false;
 			}
 
+			if ( $ucmm_now > $ucmm_schedule_start && $ucmm_now <= $ucmm_schedule_end ) {
+				return true;
+			}
+
+			return false;
 		}
 
 	/**
@@ -389,7 +360,7 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 
 			// check to disable the enable page option if schedule end-time is less than current time 
 			global $wp_customize, $current_user, $user_login;
-			$ucmm_settings     = get_option( 'ucmm_wpbrigade_setting' );
+			$ucmm_settings     = $this->ucmm_settings;
 			$current_user_role = current( $current_user->roles );
 			$screen            = function_exists( 'get_current_screen' ) ? get_current_screen() : '';
 
@@ -406,16 +377,14 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 			// Main condition and excluded role/s AND [schedule is disabled] or should be false and time is left
 			if( $this->check_manual() && $this->check_schedule() && $this->is_ucmm_time() && !isset( $ucmm_settings['ucmm-enable'][ 'ucmm-wpbrigade_role_' . $current_user_role ] ) ) {
 
-				include UCMM_WPBRIGADE_DIR_PATH . 'ucmm-customize.php';
-				exit();
+				$this->ucmm_render_maintenance_page();
 			}
 
 			// check_schedule, time is remaining, excluded role/s AND [schedule is disabled] or should be true
 			if( $this->check_schedule() && !isset( $ucmm_settings['ucmm-enable'][ 'ucmm-wpbrigade_role_' . $current_user_role ] ) ) {
 
 				if($this->is_ucmm_time()){
-					include UCMM_WPBRIGADE_DIR_PATH . 'ucmm-customize.php';
-					exit();
+					$this->ucmm_render_maintenance_page();
 				}
 			}
 
@@ -423,36 +392,137 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 			if( $this->check_manual() && $this->check_schedule() && !isset( $ucmm_settings['ucmm-enable'][ 'ucmm-wpbrigade_role_' . $current_user_role ] ) ) {
 
 				if( $this->is_ucmm_time() ){				
-					include UCMM_WPBRIGADE_DIR_PATH . 'ucmm-customize.php';
-					exit();
+					$this->ucmm_render_maintenance_page();
 				}
 			}
 			
 			// check_manual, check_schedule unchecked and excluded role/s AND [check_schedule is disabled] or should be false
 			if( $this->check_manual() && $this->check_schedule() == false && !isset( $ucmm_settings['ucmm-enable'][ 'ucmm-wpbrigade_role_' . $current_user_role ] ) ) {
 
-				//Go to UCMM page
-				include UCMM_WPBRIGADE_DIR_PATH . 'ucmm-customize.php';
-				exit();
+				$this->ucmm_render_maintenance_page();
 			}
 
 			// For customizer preview.
 			if( isset( $wp_customize ) && isset( $_GET['watch'] ) && $_GET['watch'] == 'ucmm-customizer' ) {
 
-				//Go to UCMM page
-				include UCMM_WPBRIGADE_DIR_PATH . 'ucmm-customize.php';
-				exit();
+				$this->ucmm_render_maintenance_page();
 			}
 
 		}
 
 		/**
+		 * Bootstrap admin bar and render the maintenance template.
+		 *
+		 * Exits during the `wp` hook, before `template_redirect`, so core admin
+		 * bar initialization must run manually for logged-in users.
+		 *
+		 * @since 3.0.0
+		 * @return void
+		 */
+		private function ucmm_render_maintenance_page() {
+			$is_ucmm_customizer_preview = is_customize_preview()
+				|| ( isset( $_GET['watch'] ) && 'ucmm-customizer' === $_GET['watch'] );
+
+			if ( $is_ucmm_customizer_preview ) {
+				show_admin_bar( false );
+			} elseif ( is_user_logged_in() ) {
+				show_admin_bar( true );
+
+				global $wp_admin_bar;
+
+				if ( function_exists( '_wp_admin_bar_init' ) && ! is_object( $wp_admin_bar ) ) {
+					_wp_admin_bar_init();
+				}
+			}
+
+			include UCMM_WPBRIGADE_DIR_PATH . 'ucmm-customize.php';
+			exit();
+		}
+
+		/**
+		 * Check if current page should be excluded from maintenance mode based on new settings.
+		 *
+		 * @since 3.0.0
+		 * @return bool true if maintenance should be disabled for current page
+		 */
+		public function ucmm_should_exclude_current_page() {
+			
+			$ucmm_settings = get_option( 'ucmm_wpbrigade_setting' );
+			$enable_on = isset( $ucmm_settings['ucmm-enable-on'] ) ? $ucmm_settings['ucmm-enable-on'] : 'whole-site';
+
+			$current_post_id = 0;
+			
+			// Get current post/page ID - more comprehensive detection
+			if ( is_singular() ) {
+				$current_post_id = get_queried_object_id();
+			} elseif ( is_home() && get_option( 'page_for_posts' ) ) {
+				$current_post_id = get_option( 'page_for_posts' );
+			} elseif ( is_front_page() && get_option( 'page_on_front' ) ) {
+				$current_post_id = get_option( 'page_on_front' );
+			} elseif ( is_front_page() ) {
+				// Default front page (latest posts)
+				$current_post_id = 0; // Use 0 for default front page
+			}
+			
+			if ( $enable_on === 'specific-page' ) {
+				// Only show maintenance on specific pages
+				$specific_pages = isset( $ucmm_settings['ucmm-specific-pages'] ) ? $ucmm_settings['ucmm-specific-pages'] : array();
+				
+				// Ensure it's an array and convert to integers
+				if ( ! is_array( $specific_pages ) ) {
+					$specific_pages = array();
+				}
+				$specific_pages = array_map( 'intval', $specific_pages );
+				$specific_pages = array_filter( $specific_pages ); // Remove zeros
+				
+				// If no pages selected, exclude maintenance everywhere
+				if ( empty( $specific_pages ) ) {
+					return true; // Exclude maintenance mode
+				}
+				
+				// If current page is NOT in the specific pages list, exclude maintenance mode
+				if ( ! in_array( intval( $current_post_id ), $specific_pages ) ) {
+					return true; // Exclude maintenance mode
+				}
+
+				return false; // Allow maintenance mode on this specific page
+				
+			} else {
+				// Whole site mode - check exclusions
+				$exclude_pages_enabled = isset( $ucmm_settings['ucmm-exclude-pages'] ) && $ucmm_settings['ucmm-exclude-pages'] === 'on';
+				
+				if ( $exclude_pages_enabled ) {
+					$excluded_pages = isset( $ucmm_settings['ucmm-excluded-pages'] ) ? $ucmm_settings['ucmm-excluded-pages'] : array();
+					
+					// Ensure it's an array and convert to integers
+					if ( ! is_array( $excluded_pages ) ) {
+						$excluded_pages = array();
+					}
+					$excluded_pages = array_map( 'intval', $excluded_pages );
+					$excluded_pages = array_filter( $excluded_pages ); // Remove zeros
+					
+					// If current page is in exclusion list, exclude maintenance mode
+					if ( in_array( intval( $current_post_id ), $excluded_pages ) ) {
+						return true; // Exclude maintenance mode
+					}
+				}
+			}
+			
+			return false;
+		}
+
+		/**
 		 * Disable the UCMM functionality for specific page/s or post/s.
 		 *
-		 * @since 1.4.0
+		 * @since 3.0.0
 		 * @return bool true if a pages/posts is excluded | false if pages/posts are not excluded.
 		 */
 		public function ucmm_exclude_post() {
+
+			// Check new Enable On settings first
+			if ( $this->ucmm_should_exclude_current_page() ) {
+				return true;
+			}
 
 			/**
 			 * Disable the UCMM functionality for specific page/s or post/s.
@@ -494,23 +564,43 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 		 * Enqueue jQuery and use wp_localize_script.
 		 *
 		 * @since 1.0.4
-		 * @version 1.5.1
+		 * @version 3.0.0
 		 */
 		function ucmm_customizer_js() {
 
 			wp_enqueue_script( 'jquery' );
-			wp_enqueue_script( 'ucmm-customize-control', plugins_url( 'assets/js/customize-controls.js', __FILE__ ), array( 'jquery', 'customize-preview' ), UCMM_WPBRIGADE_VERSION, true );
+			wp_enqueue_script(
+				'ucmm-customize-control',
+				plugins_url( 'assets/js/customize-controls.js', __FILE__ ),
+				array( 'jquery', 'jquery-ui-sortable', 'customize-controls' ),
+				UCMM_WPBRIGADE_VERSION,
+				true
+			);
+
+			if ( isset( $_GET['autofocus'] ) && 'ucmm_wpbrigade_panel' === sanitize_text_field( wp_unslash( $_GET['autofocus'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$ucmm_auto_focus = true;
+			} else {
+				$ucmm_auto_focus = false;
+			}
 
 			wp_localize_script(
 				'ucmm-customize-control',
 				'UCMM',
 				array(
-					'url_path'  => plugin_dir_url( __FILE__ ),
-					'autoFocus' => ( isset( $_GET['customize'] ) && $_GET['customize'] == 'ucmm' ) ? true : false,
-					'customizer_strings' => array(
+					'url_path'            => plugin_dir_url( __FILE__ ),
+					'autoFocusPanel'      => $ucmm_auto_focus,
+					'header_text_default' => __( 'COMING SOON', 'ucmm-wpbrigade' ),
+					'footer_text_default' => __( "We're not quite ready yet, Something is coming very soon", 'ucmm-wpbrigade' ),
+					'customizer_strings'  => array(
 						_x( 'Powered by: ', 'String for the "Show Some Love" footer text', 'ucmm-wpbrigade' ),
 						_x( 'WPBrigade', 'String for the "Show Some Love" footer text', 'ucmm-wpbrigade' ),
-					)
+					),
+					'scheduleUtcOffset'           => (int) ucmm_wpbrigade_schedule_utc_offset(),
+					'scheduleInvalidMessage'      => __( 'End time must be later than the start time.', 'ucmm-wpbrigade' ),
+					'scheduleInvalidPreviewMessage' => __( 'End time must be later than the start time. This schedule cannot run until corrected.', 'ucmm-wpbrigade' ),
+					'schedulePendingPreviewMessage' => __( 'Maintenance has not started yet. The countdown timer will begin at the scheduled start time.', 'ucmm-wpbrigade' ),
+					'scheduleExpiredPreviewMessage' => __( 'Maintenance schedule has been expired. Please update the time or turn it off.', 'ucmm-wpbrigade' ),
+					'scheduleExpiredLiveMessage'    => __( 'Website is now LIVE! will be redirected to homepage shortly. If not, please refresh the page.', 'ucmm-wpbrigade' ),
 				)
 			);
 		}
@@ -527,25 +617,63 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 			}
 		}
 
-		public function ucmm_admin_scripts() {
-			wp_enqueue_style( 'ucmm_stlye', plugins_url( 'assets/css/style.css', __FILE__ ), array(), UCMM_WPBRIGADE_VERSION );
+		/**
+		 * Admin styles/scripts for review notice (global) and Help page log download.
+		 *
+		 * @param string $hook_suffix Current admin screen hook.
+		 * @return void
+		 */
+		public function ucmm_admin_scripts( $hook_suffix ) {
+			wp_enqueue_style(
+				'ucmm-review-notice',
+				plugins_url( 'assets/css/review-notice.css', __FILE__ ),
+				array(),
+				UCMM_WPBRIGADE_VERSION
+			);
+
+			if ( false === strpos( $hook_suffix, 'ucmm-help' ) ) {
+				return;
+			}
+
+			$asset_file = UCMM_WPBRIGADE_DIR_PATH . 'build/index.asset.php';
+			$asset_data = file_exists( $asset_file ) ? require $asset_file : array(
+				'version' => UCMM_WPBRIGADE_VERSION,
+			);
+
+			wp_enqueue_style(
+				'ucmm-inter-font',
+				'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap', // phpcs:ignore
+				array(),
+				null
+			);
+
+			wp_enqueue_style(
+				'ucmm-react-settings',
+				UCMM_WPBRIGADE_DIR_URL . 'build/index.css',
+				array( 'ucmm-inter-font' ),
+				$asset_data['version']
+			);
+
+			wp_enqueue_style(
+				'ucmm-help-page',
+				plugins_url( 'assets/css/help-page.css', __FILE__ ),
+				array( 'ucmm-react-settings' ),
+				UCMM_WPBRIGADE_VERSION
+			);
+
 			wp_enqueue_script( 'ucmm-js', plugins_url( 'assets/js/main.js', __FILE__ ), array( 'jquery' ), UCMM_WPBRIGADE_VERSION, true );
 
-			/**
-			*  Localizes a registered script with data for a JavaScript variable.
-			*
-			*  1st Attribute is the Handle that is same as our enqueue js file.
-			*  2nd Attribute is the Name that is use in ajax => url.
-			*  3rd Attribute is the Data itself in which we pass the admin-ajax path in array.
-			*/
 			wp_localize_script(
 				'ucmm-js',
 				'mc_api',
 				array(
-					'ajaxurl'    => admin_url( 'admin-ajax.php' ),
-					'loader'     => admin_url( '/images/spinner.gif' ),
-					'help_nonce' => wp_create_nonce( 'ucmm_help_nonce' ),
-					'security' 	 => wp_create_nonce( 'security_under-construction-maintenance-mode' ),
+					'ajaxurl'     => admin_url( 'admin-ajax.php' ),
+					'loader'      => admin_url( '/images/spinner.gif' ),
+					'help_nonce'  => wp_create_nonce( 'ucmm_help_nonce' ),
+					'security'    => wp_create_nonce( 'security_under-construction-maintenance-mode' ),
+					'copyLabel'     => __( 'Copy', 'ucmm-wpbrigade' ),
+					'copiedLabel'   => __( 'Copied!', 'ucmm-wpbrigade' ),
+					'copyAriaLabel' => __( 'Copy system info', 'ucmm-wpbrigade' ),
 				)
 			);
 		}
@@ -556,36 +684,6 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 			wp_die();
 		}
 
-		public function ucmm_callback_url() {
-
-			global $submenu;
-
-			$parent = 'index.php';
-			$page   = 'under-construction-maintenance-mode';
-
-			// Create specific url for login view
-			$login_url = wp_login_url();
-			$url       = add_query_arg(
-				array(
-					'url'    => urlencode( $login_url ),
-					'return' => admin_url( 'themes.php' ),
-				),
-				admin_url( 'customize.php' )
-			);
-
-			// If is Not Design Menu, return
-			if ( ! isset( $submenu[ $parent ] ) ) :
-				return null;
-		  endif;
-
-			foreach ( $submenu[ $parent ] as $key => $value ) :
-				// Set new URL for menu item
-				if ( $page === $value[2] ) :
-					$submenu[ $parent ][ $key ][2] = $url;
-					break;
-				endif;
-		  endforeach;
-		}
 		/**
 		 * @since 1.0.5
 		 */
@@ -650,9 +748,173 @@ if ( ! class_exists( 'UCMM_WPBrigade' ) ) :
 		public function ucmm_set_setting() {
 			$this->ucmm_settings           = (array) get_option( 'ucmm_wpbrigade_setting' );
 			$this->ucmm_customize_settings = (array) get_option( 'ucmm_wpbrigade_customization' );
+
+			if ( ! array_key_exists( 'ucmm-enable', $this->ucmm_settings ) ) {
+				$this->ucmm_settings['ucmm-enable'] = ucmm_wpbrigade_default_role_exemptions();
+			} else {
+				$this->ucmm_settings['ucmm-enable'] = ucmm_wpbrigade_migrate_role_exemption_keys(
+					$this->ucmm_settings['ucmm-enable']
+				);
+			}
 		}
 	}
 
 endif;
+
+if ( ! function_exists( 'ucmm_wpbrigade_default_role_exemptions' ) ) {
+	/**
+	 * Roles exempt from maintenance when ucmm-enable has never been saved.
+	 *
+	 * @return array<string, string>
+	 */
+	function ucmm_wpbrigade_default_role_exemptions() {
+		return array(
+			'ucmm-wpbrigade_role_administrator' => 'ucmm-wpbrigade_role_administrator',
+		);
+	}
+
+	/**
+	 * Migrate legacy underscore role keys to hyphenated keys.
+	 *
+	 * @param array $exemptions Saved ucmm-enable value.
+	 * @return array<string, string>
+	 */
+	function ucmm_wpbrigade_migrate_role_exemption_keys( $exemptions ) {
+		if ( ! is_array( $exemptions ) ) {
+			return array();
+		}
+
+		if ( isset( $exemptions['ucmm_wpbrigade_role_administrator'] ) ) {
+			$exemptions['ucmm-wpbrigade_role_administrator'] = 'ucmm-wpbrigade_role_administrator';
+			unset( $exemptions['ucmm_wpbrigade_role_administrator'] );
+		}
+
+		return $exemptions;
+	}
+}
+
+if ( ! function_exists( 'ucmm_wpbrigade_get_timezone_label' ) ) {
+	/**
+	 * Human-readable WordPress site timezone (city or UTC offset).
+	 *
+	 * @return string
+	 */
+	function ucmm_wpbrigade_get_timezone_label() {
+		if ( function_exists( 'wp_timezone_string' ) ) {
+			$tz_string = wp_timezone_string();
+			if ( is_string( $tz_string ) && '' !== $tz_string ) {
+				return $tz_string;
+			}
+		}
+
+		$offset = (float) get_option( 'gmt_offset', 0 );
+		if ( 0.0 === $offset ) {
+			return 'UTC';
+		}
+
+		$sign  = $offset >= 0 ? '+' : '-';
+		$hours = (int) floor( abs( $offset ) );
+		$mins  = (int) round( ( abs( $offset ) - $hours ) * 60 );
+
+		if ( 0 === $mins ) {
+			return 'UTC' . $sign . $hours;
+		}
+
+		return sprintf( 'UTC%s%d:%02d', $sign, $hours, $mins );
+	}
+}
+
+if ( ! function_exists( 'ucmm_wpbrigade_schedule_to_timestamp' ) ) {
+	/**
+	 * Parse a datetime-local schedule value in the WordPress site timezone.
+	 *
+	 * @param string $datetime_local Value from datetime-local input (e.g. 2026-06-05T15:40).
+	 * @return int|false Unix timestamp, or false on failure.
+	 */
+	function ucmm_wpbrigade_schedule_to_timestamp( $datetime_local ) {
+		if ( ! is_string( $datetime_local ) || '' === trim( $datetime_local ) ) {
+			return false;
+		}
+
+		$datetime_local = trim( $datetime_local );
+		$timezone       = function_exists( 'wp_timezone' ) ? wp_timezone() : new DateTimeZone( 'UTC' );
+		$formats        = array( 'Y-m-d\TH:i:s', 'Y-m-d\TH:i', 'Y-m-d H:i:s', 'Y-m-d H:i' );
+
+		foreach ( $formats as $format ) {
+			$dt = DateTimeImmutable::createFromFormat( $format, $datetime_local, $timezone );
+			if ( false !== $dt ) {
+				return $dt->getTimestamp();
+			}
+		}
+
+		try {
+			$dt = new DateTimeImmutable( $datetime_local, $timezone );
+			return $dt->getTimestamp();
+		} catch ( Exception $e ) {
+			return false;
+		}
+	}
+}
+
+if ( ! function_exists( 'ucmm_wpbrigade_schedule_utc_offset' ) ) {
+	/**
+	 * WordPress site timezone offset in seconds (for JS datetime-local parsing).
+	 *
+	 * @return int
+	 */
+	function ucmm_wpbrigade_schedule_utc_offset() {
+		if ( ! function_exists( 'wp_timezone' ) ) {
+			return 0;
+		}
+
+		$timezone = wp_timezone();
+		$now      = new DateTimeImmutable( 'now', $timezone );
+
+		return (int) $timezone->getOffset( $now );
+	}
+}
+
+if ( ! function_exists( 'ucmm_wpbrigade_get_schedule_countdown_state' ) ) {
+	/**
+	 * Countdown UI state for maintenance schedule times.
+	 *
+	 * @param string $start_raw datetime-local start value.
+	 * @param string $end_raw   datetime-local end value.
+	 * @return string invalid|expired|countdown
+	 */
+	function ucmm_wpbrigade_get_schedule_countdown_state( $start_raw, $end_raw ) {
+		$start_ts = ucmm_wpbrigade_schedule_to_timestamp( $start_raw );
+		$end_ts   = ucmm_wpbrigade_schedule_to_timestamp( $end_raw );
+
+		if ( false === $start_ts || false === $end_ts || $end_ts <= $start_ts ) {
+			return 'invalid';
+		}
+
+		if ( time() > $end_ts ) {
+			return 'expired';
+		}
+
+		return 'countdown';
+	}
+}
+
+if ( ! function_exists( 'ucmm_wpbrigade_get_customizer_url' ) ) {
+	/**
+	 * Admin URL to open the UCMM customizer panel.
+	 *
+	 * @return string
+	 */
+	function ucmm_wpbrigade_get_customizer_url() {
+		$preview_url = add_query_arg(
+			array(
+				'watch'     => 'ucmm-customizer',
+				'customize' => 'ucmm',
+			),
+			home_url( '/ucmm-customize.php/' )
+		);
+
+		return get_admin_url() . 'customize.php?url=' . rawurlencode( $preview_url ) . '&autofocus=ucmm_wpbrigade_panel';
+	}
+}
 
 new UCMM_WPBrigade();

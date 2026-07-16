@@ -4,8 +4,8 @@ Author URI: https://wpbrigade.com/?utm_source=ucmm-org&utm_medium=author-url-lin
 Donate link: Author URI: https://wpbrigade.com/?utm_source=ucmm-org&utm_medium=donate-url-link
 Tags: coming soon, under construction, maintenance mode, maintenance, comingsoon,
 Requires at least: 5.0
-Tested up to: 6.9
-Stable tag: 2.1.2
+Tested up to: 7.0
+Stable tag: 3.0.0
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -93,6 +93,30 @@ This section describes how to install the plugin and get it working.
 
 
 == Changelog ==
+
+= 3.0.0 – 2026-07-15 =
+* New Feature: Completely redesigned settings interface for faster, easier configuration.
+* New Feature: Choose whether to enable mode for the entire site or specific pages only.
+* New Feature: Multi-select option to exclude specific pages and posts.
+* New Feature: Real-time preview of changes before saving.
+* New Feature: Status indicators show whether maintenance mode is active.
+* New Feature: Clearer error messages to help resolve issues quickly.
+* Enhancement: Mobile-friendly design for phones and tablets.
+* Enhancement: Better-organized Customizer with new controls.
+* Enhancement: Drag-and-drop reordering for social media icons.
+* Enhancement: Improved contrast and accessibility.
+* Enhancement: Added `ucmm_redirect_message` filter to customize the pre-live message when the schedule ends.
+* Bugfix: Fixed layout issues on the settings page.
+* Bugfix: Twitter/X icon now displays correctly.
+* Bugfix: SEO default values no longer reset unexpectedly.
+* Bugfix: Resolved admin bar compatibility issues.
+* Security: Updated dependencies for improved security.
+* Compatibility: Compatible with WordPress 7.0
+* Compatibility: Compatible with PHP 8.5
+
+= 2.1.3 – 2026-05-25 =
+* Enhancement: General code refactoring and internal cleanup.
+* Compatibility: Compatible with WordPress 7.0.
 
 = 2.1.2 – 2026-03-17 =
 * Security: Added nonce verification and capability checks to prevent CSRF attacks.
@@ -232,5 +256,5 @@ This section describes how to install the plugin and get it working.
 
 == Upgrade Notice ==
 
-= 2.1.2 =
+= 3.0.0 =
 Upgrade Immediately
